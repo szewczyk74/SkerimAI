@@ -1,6 +1,6 @@
 # SkerimAI – instrukcja obsługi
 
-SkerimAI to trwałe archiwum wszystkich rozmów z aplikacjami AI: **Claude Code**, **Codex**, **KreionAI**,
+SkerimAI to trwałe archiwum wszystkich rozmów z aplikacjami AI: **Claude Code**, **Codex**,
 **Cursor** i **OpenCode**.
 Zapisuje pełną treść rozmów i załączniki (obrazy, PDF, DOCX, TXT) we własnej bazie, więc nic nie ginie,
 nawet gdy aplikacja skasuje swoje sesje. Claude Code, Codex i OpenCode przeszukują to archiwum same – przez serwer MCP
@@ -13,7 +13,7 @@ nawet gdy aplikacja skasuje swoje sesje. Claude Code, Codex i OpenCode przeszuku
 3. [Aktualizacja](#aktualizacja)
 4. [Ikona w zasobniku](#ikona-w-zasobniku)
 5. [Edycja pamięci](#edycja-pamięci)
-6. [Korzystanie w Claude Code, Codex i KreionAI](#korzystanie-w-claude-code-codex-i-kreionai)
+6. [Korzystanie w Claude Code i Codex](#korzystanie-w-claude-code-i-codex)
 7. [Wiersz poleceń](#wiersz-poleceń)
 8. [Kopia zapasowa](#kopia-zapasowa)
 9. [Gdzie są dane](#gdzie-są-dane)
@@ -30,7 +30,7 @@ Archiwum uzupełnia się samo, bez Twojego udziału:
 |---|---|
 | po zamknięciu sesji Claude Code (hook `SessionEnd`) | tę sesję; wynik w powiadomieniu Windows |
 | 20 s po starcie każdej sesji Claude Code / Codex i przed każdym wyszukiwaniem (serwer MCP) | wszystkie źródła – także bieżącą rozmowę |
-| co 5 minut, gdy coś się zmieniło (ikona w zasobniku) | Codex, KreionAI, Cursor i OpenCode – nawet bez otwierania Claude Code |
+| co 5 minut, gdy coś się zmieniło (ikona w zasobniku) | Codex, Cursor i OpenCode – nawet bez otwierania Claude Code |
 | na żądanie: menu ikony „Archiwizuj teraz” albo `skerimai archiwizuj` | wszystkie źródła |
 
 Archiwizacja zużywa zero tokenów. Wyszukiwanie przez agenta kosztuje zwykle 5–10 tys. tokenów na pytanie
@@ -41,7 +41,7 @@ w rodzaju „na czym skończyliśmy?”.
 ### Wymagania
 
 - Windows 10/11,
-- co najmniej jedna z aplikacji: Claude Code, Codex, OpenCode, Cursor (oraz KreionAI, jeśli go używasz).
+- co najmniej jedna z aplikacji: Claude Code, Codex, OpenCode, Cursor.
 
 Pythona ani gita nie trzeba instalować: instalator pobiera [uv](https://docs.astral.sh/uv/), a uv – własnego
 Pythona.
@@ -94,8 +94,6 @@ Ograniczenia:
   drugi raz zastąpi to, co nowy komputer zdążył zebrać.
 - Archiwum musi leżeć na dysku lokalnym (nie sieciowym ani synchronizowanym), a w drodze traktuj je jak dane
   poufne – [surowe kopie mogą zawierać hasła](#gdzie-są-dane).
-- KreionAI: archiwizowany jest kartridż z `C:\Kreion\aae_ai_local_data\cartridge`; na komputerze bez KreionAI
-  to źródło jest po prostu pomijane.
 
 ## Aktualizacja
 
@@ -113,7 +111,7 @@ nie działa. Okna SkerimAI (pamięć, stan, kopia) trzeba przed aktualizacją za
 ## Ikona w zasobniku
 
 Ikona (niebieski znak z „S” w zasobniku systemowym obok zegara) pokazuje, czy archiwum działa, i archiwizuje
-Codex oraz KreionAI, które nie mają własnego hooka. Zajmuje ok. 48 MB pamięci, nie zużywa tokenów.
+Codex, Cursor i OpenCode, które nie mają własnego hooka. Zajmuje ok. 48 MB pamięci, nie zużywa tokenów.
 
 ### Uruchamianie
 
@@ -155,7 +153,7 @@ Kropka i podpowiedź odświeżają się co 30 s, pełne sprawdzenie (jak `skerim
 | **Edytuj pamięć…** | okno [edycji pamięci](#edycja-pamięci): ukrywanie, tytuły, usuwanie, wymazywanie sekretów |
 | **Archiwizuj teraz** | archiwizuje wszystkie źródła; wynik w powiadomieniu |
 | **Sprawdź stan** | [okno stanu](#okno-stanu) (to samo robi **lewy klik** w ikonę) |
-| **Więcej ▸ Jak rozmawiać z pamięcią…** | ściąga ze zwrotami dla Claude Code, Codex i KreionAI w Notatniku ([`skerimai/jak_rozmawiac.txt`](skerimai/jak_rozmawiac.txt)) |
+| **Więcej ▸ Jak rozmawiać z pamięcią…** | ściąga ze zwrotami dla Claude Code i Codex w Notatniku ([`skerimai/jak_rozmawiac.txt`](skerimai/jak_rozmawiac.txt)) |
 | **Więcej ▸ Kopia zapasowa…** | wybór folderu, potem [kopia archiwum](#kopia-zapasowa) w [oknie z postępem](#okna-poleceń) |
 | **Więcej ▸ Otwórz folder archiwum** | `%USERPROFILE%\.skerimai` w Eksploratorze |
 | **Więcej ▸ Otwórz dziennik** | `archiwizator.log` w Notatniku |
@@ -209,8 +207,7 @@ przypisanym do niego w Windows.
 
 Górna lista to rozmowy (od najnowszej), dolna – wiadomości wybranej rozmowy, z prawej pełna treść wiadomości.
 Filtry: **Szukaj** (słowa w treści, jak wyszukiwanie agenta, albo fragment tytułu), **Źródło**, **Projekt**,
-**Pokaż**: wszystkie / w pamięci / ukryte. Jak w wyszukiwaniu, „wszystkie” źródła pomijają robocze kopie
-`kreion_silniki` – widać je po wybraniu tego źródła.
+**Pokaż**: wszystkie / w pamięci / ukryte.
 
 ### Tytuł i projekt
 
@@ -247,18 +244,16 @@ a sekret musi mieć co najmniej 4 znaki.
 
 Bez zmian zostają:
 
-- pliki samych aplikacji (`~\.claude\projects`, `~\.codex\sessions`, KreionAI) – sekret trzeba usunąć także tam
+- pliki samych aplikacji (`~\.claude\projects`, `~\.codex\sessions`) – sekret trzeba usunąć także tam
   albo po prostu zmienić hasło / unieważnić klucz,
 - wcześniejsze kopie zapasowe archiwum,
 - pliki PDF i DOCX w załącznikach – wymazany jest tylko ich tekst w bazie; okno podaje ich nazwy,
-- nazwa pliku rozmowy KreionAI (KreionAI nazywa plik pierwszą wiadomością) – gdy sekret jest w niej, okno to
-  zgłasza, a przycisk **Zaznacz te rozmowy** wskazuje je do usunięcia na stałe.
 
-## Korzystanie w Claude Code, Codex i KreionAI
+## Korzystanie w Claude Code i Codex
 
 Nie trzeba niczego wywoływać – wystarczy pytać naturalnie:
 
-- „Jak ustaliliśmy obsługę logowania w KreionAI?”
+- „Jak ustaliliśmy obsługę logowania?”
 - „Pamiętasz, co robiliśmy z kartą KSM?”
 - „Na czym skończyliśmy wczoraj w projekcie sklep?”
 - „Pokaż schemat wklejony w zeszłym tygodniu.”
@@ -273,17 +268,12 @@ Gdy agent mimo to odpowiada z samych plików, powiedz wprost: „sprawdź w Sker
 Pełna ściąga: [`skerimai/jak_rozmawiac.txt`](skerimai/jak_rozmawiac.txt), w ikonie w zasobniku
 pod **Jak rozmawiać z pamięcią…**.
 
-| Sytuacja | Claude Code / Codex | KreionAI |
-|---|---|---|
-| początek rozmowy | „wróćmy do projektu, przeczytaj końcówkę ostatniej rozmowy i PLAN.md” | „przypomnij sobie projekt X z kartridża, a potem sprawdź w SkerimAI, co robiłem nad nim w Claude Code i Codexie” |
-| pytanie w trakcie | „sprawdź w SkerimAI, co ustaliliśmy o …” | „użyj szukaj_w_historii ze SkerimAI: …” |
-| ostatnie rozmowy | „pokaż z SkerimAI rozmowy z projektu X z ostatniego tygodnia” | „wywołaj lista_rozmow ze SkerimAI dla projektu X i przeczytaj ostatnią” |
-| agent nie sięgnął do archiwum | „poszukaj w historii SkerimAI…” | „w kartridżu tego nie ma, sprawdź w SkerimAI” |
-
-KreionAI traktuje SkerimAI jako wiedzę z zewnątrz: najpierw szuka we własnym kartridżu (który w SkerimAI
-ma domyślnie pominięty, żeby nie było dubli) i przytacza wyniki ze źródłem i datą. Pomaga nazwać aplikację
-(„w Claude Code”, „w Codexie”) albo SkerimAI wprost. Projekt w Claude Code i Codex to nazwa folderu
-(np. `SkerimAI`), a w KreionAI – projekt z kartridża, więc gdy nazwy się różnią, podaj tę z folderu.
+| Sytuacja | Zwrot |
+|---|---|
+| początek rozmowy | „wróćmy do projektu, przeczytaj końcówkę ostatniej rozmowy i PLAN.md” |
+| pytanie w trakcie | „sprawdź w SkerimAI, co ustaliliśmy o …” |
+| ostatnie rozmowy | „pokaż z SkerimAI rozmowy z projektu X z ostatniego tygodnia” |
+| agent nie sięgnął do archiwum | „poszukaj w historii SkerimAI…” |
 
 Agent korzysta z czterech narzędzi serwera `skerimai`:
 
@@ -299,15 +289,15 @@ Gdy agent nie sięga do archiwum sam, poproś wprost: „poszukaj w historii Ske
 ### Projekty
 
 Każda rozmowa ma projekt: w Claude Code i Codex to nazwa folderu, w którym pracowała sesja
-(`C:\Projekty\sklep.pl` → `sklep.pl`), w KreionAI – projekt z kartridża. Nazwę można zmienić w oknie
-[edycji pamięci](#tytuł-i-projekt), np. żeby połączyć `pszczola` z Claude Code i `Pszczoła` z KreionAI.
+(`C:\Projekty\sklep.pl` → `sklep.pl`). Nazwę można zmienić w oknie
+[edycji pamięci](#tytuł-i-projekt), np. żeby połączyć `pszczola` z Claude Code i `Pszczoła` z Codex.
 
 Wyszukiwanie obejmuje zawsze całe archiwum, bez względu na to, w jakim folderze pracuje sesja – rozmowa
 bywa prowadzona w innym projekcie, niż dotyczy (np. pomysł na nowy program bywa w rozmowie z projektu `sklep.pl`).
 Projekt widać przy każdym trafieniu. Żeby zawęzić:
 
 - **słowem w pytaniu** – „poszukaj w historii: budzik kalendarz” znajdzie rozmowy, w których pada „budzik”,
-  także te zapisane w innym projekcie (tak zawęża agent KreionAI),
+  także te zapisane w innym projekcie,
 - **filtrem** – „szukaj tylko w projekcie budzik”: agent poda `projekt`, a wyniki będą wyłącznie z rozmów
   o tej nazwie projektu; rozmowę z niewłaściwym projektem przenieś wtedy w oknie edycji. Wystarczy fragment
   nazwy, a wielkość liter i polskie znaki nie mają znaczenia („pszczola” znajdzie „Pszczoła”).
@@ -330,15 +320,13 @@ Te same możliwości są dostępne w terminalu. Pomoc: `skerimai --help`, `skeri
 | `skerimai konfiguruj` | wpisuje / naprawia całą konfigurację; `--usun` – usuwa ją |
 | `skerimai instaluj` | instalacja / aktualizacja kopii używanej: najnowsze wydanie z GitHuba (`--wersja X.Y.Z` – wskazane), z kopii rozwojowej – bieżący commit |
 
-Źródła (`--zrodlo`): `claude_code`, `codex`, `kreion_kartridz`, `kreion_silniki`, `cursor`. Bez tej opcji
-wyszukiwanie i lista pomijają `kreion_silniki` – to robocze kopie rozmów z kartridża KreionAI, które
-dublowałyby trafienia.
+Źródła (`--zrodlo`): `claude_code`, `codex`, `cursor`, `opencode`.
 
 Przykłady:
 
 ```powershell
 skerimai szukaj logowanie hasło
-skerimai szukaj "karta KSM" --zrodlo kreion_kartridz
+skerimai szukaj "karta KSM" --zrodlo codex
 skerimai rozmowy --projekt sklep --od 2026-09-01
 skerimai czytaj 42 --od-wiad 20
 skerimai zalacznik 3fa9c1 --tekst
@@ -387,7 +375,6 @@ usuwa [Wymaż sekret…](#wymazywanie-sekretów).
 |---|---|
 | `SKERIMAI_DIR` | inny folder archiwum niż `%USERPROFILE%\.skerimai` |
 | `SKERIMAI_POWIADOMIENIA=0` | wyłącza powiadomienia Windows |
-| `SKERIMAI_KREION_DIR` | inny folder kartridża KreionAI niż `C:\Kreion\aae_ai_local_data\cartridge` |
 | `SKERIMAI_OPENCODE_POMIN` | nazwy katalogów (po przecinku), z których rozmowy OpenCode nie trafiają do archiwum; domyślnie sondy Herdr: `herdr-oc-probe,oc-models`; pusta – nic nie pomija |
 
 Ustawienie na stałe: `setx NAZWA wartość`, potem ponowne uruchomienie Claude Code, Codex i ikony.
