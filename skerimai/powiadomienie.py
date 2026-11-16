@@ -36,6 +36,11 @@ $null = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notificat
 """
 
 
+def _sam_komunikat(skrypt: str) -> str:
+    """Błąd jako jedna linia tekstu – bez tego PowerShell z -EncodedCommand oddaje go na stderr w XML (CLIXML)."""
+    return f"try {{\n{skrypt}}} catch {{ [Console]::Error.WriteLine($_.Exception.Message); exit 1 }}\n"
+
+
 def wlaczone() -> bool:
     return os.name == "nt" and os.environ.get("SKERIMAI_POWIADOMIENIA") != "0"
 
@@ -54,7 +59,7 @@ def pokaz(naglowek: str, tresc: str) -> None:
         return
     try:
         zarejestruj_aplikacje()
-        wynik = powershell(_SKRYPT, {"SKERIMAI_TOAST": xml_toastu(naglowek, tresc)})
+        wynik = powershell(_sam_komunikat(_SKRYPT), {"SKERIMAI_TOAST": xml_toastu(naglowek, tresc)})
     except (OSError, subprocess.SubprocessError) as blad:
         log.warning("powiadomienie nie wyświetlone: %s", blad)
         return
@@ -65,7 +70,7 @@ def pokaz(naglowek: str, tresc: str) -> None:
 
 def ustawienie_windows() -> str:
     """Czy Windows pokaże toasty SkerimAI: Enabled, DisabledForApplication, DisabledForUser, DisabledByGroupPolicy…"""
-    wynik = powershell(_SKRYPT_USTAWIENIA)
+    wynik = powershell(_sam_komunikat(_SKRYPT_USTAWIENIA))
     if wynik.returncode:
         raise OSError(wynik.stderr.decode("oem", "replace").strip()[:300])
     return wynik.stdout.decode("oem", "replace").strip()

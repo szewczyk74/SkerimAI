@@ -476,10 +476,11 @@ def test_sprawdz_na_nieskonfigurowanym_komputerze(miejsca, program, sciezki):
     wyniki = {w.nazwa: w for w in sprawdz(miejsca, program, sciezki, [])}
 
     for nazwa in ("Hook SessionEnd w Claude Code", "Serwer MCP w Claude Code", "Serwer MCP w Codex",
-                  "Wskazówka w ~\\.claude\\CLAUDE.md", "Archiwum"):
+                  "Wskazówka w ~\\.claude\\CLAUDE.md"):
         assert wyniki[nazwa].stan == BLAD, nazwa
     assert "skerimai konfiguruj" in wyniki["Serwer MCP w Codex"].opis
-    assert "skerimai archiwizuj" in wyniki["Archiwum"].opis
+    # bez żadnej rozmowy w aplikacjach (świeży komputer) archiwum jeszcze nie powstało – to nie błąd
+    assert wyniki["Archiwum"].stan == INFO and "jeszcze puste" in wyniki["Archiwum"].opis
     assert not sciezki.baza.exists()  # diagnostyka nie zakłada pustej bazy
     assert wyniki["Ostatnia archiwizacja w tle"].stan == INFO
 
@@ -533,6 +534,31 @@ def test_archiwum_w_folderze_onedrive_to_blad(archiwum, monkeypatch):
 
     assert wynik.stan == BLAD
     assert "folder OneDrive" in wynik.opis and "skerimai kopia" in wynik.opis
+
+
+def test_brak_bazy_to_blad_tylko_gdy_sa_rozmowy(sciezki):
+    class Zrodlo:
+        def __init__(self, nazwa, sesje):
+            self.nazwa, self.sesje = nazwa, sesje
+
+        def znajdz_sesje(self):
+            if isinstance(self.sesje, OSError):
+                raise self.sesje
+            return self.sesje
+
+    def archiwum(*zrodla):
+        return {w.nazwa: w for w in sprawdz(Miejsca(sciezki.katalog / "dom"), Program(sciezki.katalog), sciezki,
+                                            list(zrodla), najnowsza=lambda: None)}
+
+    puste = archiwum(Zrodlo("codex", {}), Zrodlo("cursor", {}))
+    z_rozmowa = archiwum(Zrodlo("codex", {}), Zrodlo("cursor", {"s1": []}))
+    nieczytelne = archiwum(Zrodlo("codex", {}), Zrodlo("cursor", OSError("brak dostępu")))
+
+    assert puste["Archiwum"].stan == INFO and "jeszcze puste" in puste["Archiwum"].opis
+    assert z_rozmowa["Archiwum"].stan == BLAD and "skerimai archiwizuj" in z_rozmowa["Archiwum"].opis
+    assert nieczytelne["Archiwum"].stan == BLAD  # nie wiadomo, czy są rozmowy
+    assert z_rozmowa["Sesje w źródłach"].opis == "codex 0, cursor 1"
+    assert "cursor – błąd odczytu (brak dostępu)" in nieczytelne["Sesje w źródłach"].opis
 
 
 def test_wykonaj_zglasza_brak_programu():

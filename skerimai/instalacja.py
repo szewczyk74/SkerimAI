@@ -752,6 +752,7 @@ def sprawdz(miejsca: Miejsca, program: Program, sciezki: Sciezki, adaptery: list
     adaptery = adaptery if adaptery is not None else [klasa() for klasa in ADAPTERY.values()]
     claude, codex = miejsca.claude.is_dir(), miejsca.codex.is_dir()
     blok = tekst_wskazowki(program)
+    sesje = _policz_sesje(adaptery)
     return [
         _sprawdz_program(program, wykonaj, najnowsza or (lambda: najnowsza_wersja(sciezki.wydanie))),
         _sprawdz_hook(miejsca, program) if claude else Wynik("Hook SessionEnd w Claude Code", INFO, "brak Claude Code"),
@@ -768,9 +769,9 @@ def sprawdz(miejsca: Miejsca, program: Program, sciezki: Sciezki, adaptery: list
         _sprawdz_wskazowke(miejsca, miejsca.agents_md, blok) if codex else Wynik("Wskazówka w AGENTS.md", INFO, "brak Codex"),
         _sprawdz_powiadomienia(),
         _sprawdz_zasobnik(program, sciezki),
-        _sprawdz_archiwum(sciezki),
+        _sprawdz_archiwum(sciezki, None if any(isinstance(n, OSError) for _, n in sesje) else sum(n for _, n in sesje)),
         _sprawdz_dziennik(sciezki),
-        _sprawdz_zrodla(adaptery),
+        _sprawdz_zrodla(sesje),
     ]
 
 
@@ -951,7 +952,7 @@ def _sprawdz_powiadomienia() -> Wynik:
     try:
         ustawienie = powiadomienie.ustawienie_windows()
     except (OSError, subprocess.SubprocessError) as blad:
-        return Wynik(nazwa, UWAGA, f"nie udało się odczytać ustawień Windows: {blad}")
+        return Wynik(nazwa, UWAGA, f"Windows nie podał ustawień powiadomień (tak bywa np. w Windows Sandbox): {blad}")
     if ustawienie == "Enabled":
         return Wynik(nazwa, OK, "włączone")
     return Wynik(nazwa, UWAGA, _USTAWIENIA_POWIADOMIEN.get(ustawienie, ustawienie))
@@ -1010,10 +1011,14 @@ def _sprawdz_kreion(program: Program, sciezki: Sciezki) -> Wynik:
     return Wynik(nazwa, INFO, f"ostatnie połączenie {czas.astimezone():%Y-%m-%d %H:%M}")
 
 
-def _sprawdz_archiwum(sciezki: Sciezki) -> Wynik:
+def _sprawdz_archiwum(sciezki: Sciezki, sesje_w_zrodlach: int | None = None) -> Wynik:
+    """`sesje_w_zrodlach`: 0 – nie ma jeszcze żadnej rozmowy (świeży komputer), więc brak bazy to nie błąd."""
     nazwa = "Archiwum"
     skad = "z SKERIMAI_DIR" if os.environ.get("SKERIMAI_DIR") else "domyślne"
     if not sciezki.baza.is_file():
+        if sesje_w_zrodlach == 0:
+            return Wynik(nazwa, INFO, f"jeszcze puste – w aplikacjach nie ma rozmów; baza powstanie w {sciezki.katalog} "
+                                      "przy pierwszej archiwizacji")
         return Wynik(nazwa, BLAD, f"brak bazy w {sciezki.katalog} ({skad}) – uruchom: skerimai archiwizuj")
     rodzaj = rodzaj_dysku(sciezki.katalog)
     polaczenie = polacz(sciezki.baza)
@@ -1040,13 +1045,18 @@ def _sprawdz_dziennik(sciezki: Sciezki) -> Wynik:
     return Wynik(NAZWA_DZIENNIKA, STANY_DZIENNIKA[wpis.poziom], f"{wpis.czas} – {wpis.tresc}")
 
 
-def _sprawdz_zrodla(adaptery: list[Adapter]) -> Wynik:
-    czesci = []
+def _policz_sesje(adaptery: list[Adapter]) -> list[tuple[str, int | OSError]]:
+    wynik: list[tuple[str, int | OSError]] = []
     for adapter in adaptery:
         try:
-            czesci.append(f"{adapter.nazwa} {len(adapter.znajdz_sesje())}")
+            wynik.append((adapter.nazwa, len(adapter.znajdz_sesje())))
         except OSError as blad:
-            czesci.append(f"{adapter.nazwa} – błąd odczytu ({blad})")
+            wynik.append((adapter.nazwa, blad))
+    return wynik
+
+
+def _sprawdz_zrodla(sesje: list[tuple[str, int | OSError]]) -> Wynik:
+    czesci = [f"{nazwa} – błąd odczytu ({n})" if isinstance(n, OSError) else f"{nazwa} {n}" for nazwa, n in sesje]
     return Wynik("Sesje w źródłach", INFO, ", ".join(czesci) or "brak źródeł")
 
 
