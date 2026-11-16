@@ -266,6 +266,7 @@ class Zasobnik:
         self.wyniki: list[Wynik] = []
         self.rozmowy: int | None = None
         self.odcisk: frozenset | None = None
+        self.wpis_przy_sprawdzeniu: str | None = None  # czas ostatniego wpisu dziennika przy pełnym sprawdzeniu
         self.stan = Stan(ZIELONY, "SkerimAI – sprawdzam…")
         self.ikona = None
         self._koniec = threading.Event()
@@ -280,6 +281,7 @@ class Zasobnik:
             self._bezpiecznie(self.odswiez)  # przy starcie: kolor i podpowiedź od razu, pełne sprawdzenie trwa dłużej
             self._bezpiecznie(self.sprawdz_pelne)
         if sekunda % ODSWIEZANIE_S == 0:
+            self._bezpiecznie(self.sprawdz_po_archiwizacji)
             self._bezpiecznie(self.odswiez)
         if sekunda % ARCHIWIZACJA_S == 0:
             self._bezpiecznie(self.archiwizuj_zmienione)
@@ -297,7 +299,16 @@ class Zasobnik:
             self.ikona.title = stan.podpowiedz
             self.ikona.update_menu()
 
+    def sprawdz_po_archiwizacji(self) -> None:
+        """Po zakończonej archiwizacji (nowy wpis w dzienniku) – od razu, nie po 10 minutach. Na nowym komputerze
+        pierwsze sprawdzenie trafia na „brak bazy”, zanim pierwsza archiwizacja ją założy."""
+        wpis = ostatni_wpis(self.sciezki.dziennik)
+        if wpis is not None and wpis.czas != self.wpis_przy_sprawdzeniu:
+            self.sprawdz_pelne()
+
     def sprawdz_pelne(self) -> None:
+        wpis = ostatni_wpis(self.sciezki.dziennik)
+        self.wpis_przy_sprawdzeniu = wpis.czas if wpis else None
         self.wyniki = self.sprawdzaj()
         if self.sciezki.baza.is_file():
             polaczenie = polacz(self.sciezki.baza)

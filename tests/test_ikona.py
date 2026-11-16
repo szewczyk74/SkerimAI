@@ -195,6 +195,27 @@ def test_krok_odswieza_stan_i_konczy_na_prosbe(sciezki, tmp_path, zrodlo):
     assert not zasobnik.krok(1)
 
 
+def test_po_archiwizacji_sprawdza_stan_od_razu(sciezki, tmp_path, zrodlo):
+    """Nowy komputer: pierwsze sprawdzenie widzi „brak bazy”, zanim pierwsza archiwizacja ją założy – czerwona
+    kropka nie może trwać 10 minut do następnego sprawdzenia."""
+    sprawdzenia = []
+
+    def sprawdzaj():
+        sprawdzenia.append(True)
+        return [Wynik("Archiwum", BLAD, "brak bazy")] if len(sprawdzenia) == 1 else []
+
+    zasobnik = ikona.Zasobnik(sciezki, Miejsca(tmp_path / "dom"), adaptery=[zrodlo], zlec_archiwizacje=lambda *a, **k: None,
+                              sprawdzaj=sprawdzaj, policz_serwery=lambda: 0)
+
+    assert zasobnik.krok(0) and zasobnik.stan.kolor == ikona.CZERWONY
+    assert zasobnik.krok(ikona.ODSWIEZANIE_S) and len(sprawdzenia) == 1  # dziennik pusty – archiwizacja trwa
+    sciezki.katalog.mkdir(parents=True, exist_ok=True)
+    sciezki.dziennik.write_text("2026-11-16 23:41:08 INFO zasobnik: Sesje: 4, zaktualizowane: 4\n", encoding="utf-8")
+
+    assert zasobnik.krok(2 * ikona.ODSWIEZANIE_S) and zasobnik.stan.kolor == ikona.ZIELONY
+    assert zasobnik.krok(3 * ikona.ODSWIEZANIE_S) and len(sprawdzenia) == 2  # bez nowego wpisu – bez sprawdzenia
+
+
 class UdawanaIkona:
     visible = True
 

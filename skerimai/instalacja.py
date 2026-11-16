@@ -955,6 +955,8 @@ def _sprawdz_powiadomienia() -> Wynik:
         return Wynik(nazwa, UWAGA, f"Windows nie podał ustawień powiadomień (tak bywa np. w Windows Sandbox): {blad}")
     if ustawienie == "Enabled":
         return Wynik(nazwa, OK, "włączone")
+    if not ustawienie:
+        return Wynik(nazwa, INFO, "zarejestrowane; Windows pokaże ich ustawienia po pierwszym powiadomieniu SkerimAI")
     return Wynik(nazwa, UWAGA, _USTAWIENIA_POWIADOMIEN.get(ustawienie, ustawienie))
 
 

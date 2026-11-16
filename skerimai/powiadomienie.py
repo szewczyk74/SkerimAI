@@ -30,9 +30,10 @@ $xml.LoadXml($env:SKERIMAI_TOAST)
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($env:SKERIMAI_AUMID).Show($toast)
 """
+# Przed pierwszym pokazanym powiadomieniem Windows nie ma ustawień aplikacji – Setting jest pusty (wtedy "").
 _SKRYPT_USTAWIENIA = r"""$ErrorActionPreference = 'Stop'
 $null = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
-[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($env:SKERIMAI_AUMID).Setting.ToString()
+"$([Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($env:SKERIMAI_AUMID).Setting)"
 """
 
 
@@ -69,7 +70,8 @@ def pokaz(naglowek: str, tresc: str) -> None:
 
 
 def ustawienie_windows() -> str:
-    """Czy Windows pokaże toasty SkerimAI: Enabled, DisabledForApplication, DisabledForUser, DisabledByGroupPolicy…"""
+    """Czy Windows pokaże toasty SkerimAI: Enabled, DisabledForApplication, DisabledForUser, DisabledByGroupPolicy…
+    Pusty tekst – SkerimAI nie pokazał jeszcze żadnego powiadomienia, więc Windows nie ma jego ustawień."""
     wynik = powershell(_sam_komunikat(_SKRYPT_USTAWIENIA))
     if wynik.returncode:
         raise OSError(wynik.stderr.decode("oem", "replace").strip()[:300])

@@ -918,3 +918,16 @@ def test_sprawdz_ostrzega_gdy_repozytorium_ma_nowszy_commit(rozwojowa, uv):
     assert bez_zmian_w_programie.stan == OK and "bez zmian w programie" in bez_zmian_w_programie.opis
     assert "kopia rozwojowa" in instalacja._sprawdz_program(
         Program(program.skrypty, kod=rozwojowa.kod, edytowalny=True), uv).opis
+
+
+@pytest.mark.skipif(os.name != "nt", reason="powiadomienia Windows")
+def test_powiadomienia_przed_pierwszym_dymkiem_to_nie_uwaga(monkeypatch):
+    """Windows nie ma ustawień aplikacji, która nie pokazała jeszcze żadnego powiadomienia (nowa instalacja)."""
+    monkeypatch.setenv("SKERIMAI_POWIADOMIENIA", "1")
+    monkeypatch.setattr(instalacja.powiadomienie, "zarejestrowana", lambda: True)
+    ustawienie = ["", "Enabled", "DisabledForUser"]
+    monkeypatch.setattr(instalacja.powiadomienie, "ustawienie_windows", lambda: ustawienie.pop(0))
+
+    assert instalacja._sprawdz_powiadomienia().stan == INFO
+    assert instalacja._sprawdz_powiadomienia().stan == OK
+    assert instalacja._sprawdz_powiadomienia().stan == UWAGA
