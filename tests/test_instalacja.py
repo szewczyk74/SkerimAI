@@ -702,7 +702,7 @@ def test_bez_repozytorium_instaluje_najnowsze_wydanie(uv, tmp_path):
     program = zainstaluj(Program(tmp_path / "uvx" / "Scripts", wersja="0.2.0"), uv, pobierz=pyproject("0.3.0"))
 
     assert uv.instalacje[0][-1] == "https://github.com/szewczyk74/SkerimAI/archive/refs/tags/v0.3.0.zip"
-    assert "--python-preference" in uv.instalacje[0] and "only-managed" in uv.instalacje[0]
+    assert uv.instalacje[0][5:9] == ["--python", "3.13", "--python-preference", "only-managed"]
     assert (program.wersja, program.kod, program.commit) == ("0.3.0", None, None)
     assert program == instalacja.program_srodowiska(uv.narzedzia / "skerimai")
 
@@ -719,7 +719,7 @@ def test_zainstalowana_kopia_z_wydania_podpowiada_aktualizacje(uv, tmp_path):
     with pytest.raises(BladInstalacji, match="nie podmieni samej siebie") as blad:
         zainstaluj(zainstalowana, uv, pobierz=pyproject("0.3.0"))
     assert "Zainstaluj aktualizację" in str(blad.value)
-    assert "uv tool run --python-preference only-managed --from" in str(blad.value)
+    assert "uv tool run --python 3.13 --python-preference only-managed --from" in str(blad.value)
     assert "skerimai instaluj --wersja 0.3.0" in str(blad.value)
 
 

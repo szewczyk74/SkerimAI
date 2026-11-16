@@ -283,7 +283,8 @@ def test_aktualizacja_z_wydania_uruchamia_nowa_wersje_przez_uv(sciezki, tmp_path
     najnowsza[0] = "0.3.0"
     zasobnik.aktualizuj()
     adres = "https://github.com/szewczyk74/SkerimAI/archive/refs/tags/v0.3.0.zip"
-    z_wydania = [r"C:\uv\uv.exe", "tool", "run", "--python-preference", "only-managed", "--from", adres]
+    z_wydania = [r"C:\uv\uv.exe", "tool", "run", "--python", "3.13", "--python-preference", "only-managed",
+                 "--from", adres]
     assert uruchomione == [[*z_wydania, "skerimai-pamiec", "--polecenie", "SkerimAI – aktualizacja", "--",
                             *z_wydania, "skerimai", "instaluj", "--wersja", "0.3.0"]]
     assert powiadomienia[-1] == "Pobieranie aktualizacji"

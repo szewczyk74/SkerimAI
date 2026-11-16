@@ -257,6 +257,9 @@ REPOZYTORIUM = "szewczyk74/SkerimAI"
 _SUROWE = f"https://raw.githubusercontent.com/{REPOZYTORIUM}/main"
 SKRYPT_INSTALACJI = f"{_SUROWE}/instaluj.ps1"
 SPRAWDZANIE_WERSJI_S = 24 * 3600
+# Python wydań. Bez tego uv bierze najnowszego, a zależności (zstandard) mają gotowe paczki dla Windows tylko do
+# pewnej wersji – na nowszej uv budowałby je ze źródeł, co wymaga kompilatora C++ (instalacja przerywała się).
+PYTHON_WYDAN = "3.13"
 _CZEKAJ_NA_GITHUB_S = 10
 
 
@@ -268,7 +271,8 @@ def adres_wydania(wersja: str) -> str:
 def polecenie_wydania(wersja: str, *program: str) -> list[str]:
     """Program z wydania uruchomiony przez uv z jego pamięci podręcznej, poza zainstalowaną kopią – tylko tak
     zainstalowana kopia da się podmienić (Windows nie pozwala zastąpić działającego programu)."""
-    return ["uv", "tool", "run", "--python-preference", "only-managed", "--from", adres_wydania(wersja), *program]
+    return ["uv", "tool", "run", "--python", PYTHON_WYDAN, "--python-preference", "only-managed",
+            "--from", adres_wydania(wersja), *program]
 
 
 def polecenie_aktualizacji(wersja: str) -> list[str]:
@@ -417,7 +421,8 @@ def instaluj(biezacy: Program, wykonaj: Wykonaj = wykonaj, uv: Callable[[list[st
     # (kilka sekund więcej, a Claude Code czeka na serwer ograniczony czas).
     # only-managed: Python z katalogu uv (brak – uv go pobierze), nie pierwszy znaleziony w systemie. Środowisko
     # wskazuje na Pythona, z którego powstało – z Laragona czy innego programu zniknąłby przy jego aktualizacji.
-    polecenie = ["uv", "tool", "install", "--reinstall", "--compile-bytecode", "--python", f"{sys.version_info[0]}.{sys.version_info[1]}",
+    python = PYTHON_WYDAN if kod is None else f"{sys.version_info[0]}.{sys.version_info[1]}"
+    polecenie = ["uv", "tool", "install", "--reinstall", "--compile-bytecode", "--python", python,
                  "--python-preference", "only-managed", zrodlo]
     komunikat(subprocess.list2cmdline(polecenie))
     if uv(polecenie):
