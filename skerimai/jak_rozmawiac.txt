@@ -1,0 +1,73 @@
+SkerimAI – jak rozmawiać z pamięcią
+====================================
+
+SkerimAI nie ma własnych komend. Agent (Claude Code, Codex, KreionAI) sam sięga do archiwum,
+gdy rozpozna w Twoim zdaniu odpowiedni sygnał. Najpewniej działa, gdy nazwiesz SkerimAI,
+aplikację („w Claude Code”, „w Codexie”) albo narzędzie wprost.
+
+
+Narzędzia serwera MCP „skerimai”
+--------------------------------
+  szukaj_w_historii   wyszukiwanie w rozmowach i tekście dokumentów (PDF, DOCX, TXT);
+                      rozumie polską odmianę i poprawia literówki
+  lista_rozmow        przegląd rozmów: źródło, projekt, zakres dat
+  czytaj_rozmowe      odczyt rozmowy stronami
+  pobierz_zalacznik   obraz do obejrzenia albo tekst dokumentu
+  stan_archiwum       czy serwer działa (KreionAI sprawdza nim wpis)
+
+
+CLAUDE CODE i CODEX
+===================
+Mają wskazówkę w ~\.claude\CLAUDE.md / ~\.codex\AGENTS.md i instrukcje serwera,
+więc reagują na zwykłe zdania.
+
+Początek rozmowy – przypomnienie projektu
+  „wróćmy do projektu”
+  „przypomnij sobie projekt”
+  „na czym skończyliśmy?”
+  „co jest do zrobienia?”
+  Agent wywołuje lista_rozmow z nazwą folderu projektu i czyta końcówkę ostatniej
+  rozmowy z pracą nad projektem (bieżącą i krótkie poboczne rozmowy pomija).
+
+  Najpewniej:
+  „wróćmy do projektu, przeczytaj końcówkę ostatniej rozmowy i PLAN.md”
+
+W trakcie rozmowy
+  „jak ustaliliśmy …?”, „pamiętasz …?”, „co robiliśmy z …?”, „dlaczego zrobiliśmy …?”
+  „sprawdź w SkerimAI, co ustaliliśmy o …”
+  „poszukaj w SkerimAI … w rozmowach z Codexem z października”
+  „znajdź w SkerimAI ten PDF z … i pokaż jego treść”
+
+Gdy agent odpowiada z samych plików
+  „poszukaj w historii SkerimAI …”
+
+
+KREIONAI
+========
+KreionAI traktuje SkerimAI jako wiedzę z zewnątrz: najpierw szuka we własnym kartridżu
+(który w SkerimAI ma domyślnie pominięty, żeby nie było dubli), a wyniki ze SkerimAI
+przytacza ze źródłem i datą. Nie ma pliku CLAUDE.md, więc sygnał musi paść w zdaniu.
+
+Projekt w Claude Code i Codex to nazwa folderu (np. SkerimAI, sklep.pl), a w KreionAI –
+projekt z kartridża. Gdy nazwy się różnią, podaj tę z folderu.
+
+Początek rozmowy
+  „przypomnij sobie projekt X z kartridża, a potem sprawdź w SkerimAI,
+   co robiłem nad nim w Claude Code i Codexie”
+
+W trakcie rozmowy
+  „użyj szukaj_w_historii ze SkerimAI: …”
+  „sprawdź w SkerimAI, co ustaliłem w Claude Code o …”
+
+Ostatnie rozmowy
+  „wywołaj lista_rozmow ze SkerimAI dla projektu X i przeczytaj ostatnią”
+
+Gdy odpowie z samego kartridża
+  „w kartridżu tego nie ma, sprawdź w SkerimAI”
+
+
+Nie działa w ogóle?
+-------------------
+Ikona w zasobniku → Sprawdź stan. Wiersz „Serwer MCP w KreionAI” pokazuje ostatnie
+połączenie; w KreionAI można też poprosić: „wywołaj stan_archiwum ze SkerimAI”.
+Szczegóły: README.md, sekcja „Korzystanie w Claude Code, Codex i KreionAI”.

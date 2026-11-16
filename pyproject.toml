@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skerimai"
+version = "0.2.0"
+description = "Trwała pamięć rozmów z aplikacjami AI (Claude Code, Codex, KreionAI)"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "pystempel>=2.0",
+    "rapidfuzz>=3.0",
+    "pypdf>=5",
+    "pystray>=0.19",
+    "Pillow>=10.1",
+    "zstandard>=0.23",
+    "sv-ttk>=2.6",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+skerimai = "skerimai.cli:main"
+skerimai-mcp = "skerimai.serwer_mcp:main"
+
+[project.gui-scripts]
+skerimai-zasobnik = "skerimai.zasobnik:start_ikony"
+skerimai-pamiec = "skerimai.zasobnik:start_okna_pamieci"
+
+[tool.setuptools.packages.find]
+include = ["skerimai*"]
+
+[tool.setuptools.package-data]
+skerimai = ["jak_rozmawiac.txt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.uv]
+# Python z katalogu uv, nie z Laragona ani innego programu – .venv wskazuje na Pythona, z którego powstało.
+python-preference = "only-managed"
